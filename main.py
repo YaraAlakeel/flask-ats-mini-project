@@ -6,24 +6,26 @@ import repositories.candidate_repository as candidate_repository
 import module.combination_models as combination_models
 import os
 
-
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY') #special object that stores configuration variables for your application. These variables can control various aspects of how your Flask application behaves.
+app.config['SECRET_KEY'] = os.getenv(
+    'SECRET_KEY')  #special object that stores configuration variables for your application. These variables can control various aspects of how your Flask application behaves.
+
+
 #############################################job operations#########################################
 
-@app.route('/add_job',methods=['POST'])
+@app.route('/add_job', methods=['POST'])
 def add_job():
     try:
         job_name = request.json.get('job_name')
-        location = request.json.get('location','')
+        location = request.json.get('location', '')
         required_skills = request.json.get('required_skills')
 
         if not job_name or not required_skills:
-            return jsonify({'error':'missing job_name of skills'}),400
+            return jsonify({'error': 'missing job_name of skills'}), 400
 
-        db_helper=Database()
-        data_list=[job_name,location,required_skills]
-        job_id=job_repository.add_job(db_helper,data_list)
+        db_helper = Database()
+        data_list = [job_name, location, required_skills]
+        job_id = job_repository.add_job(db_helper, data_list)
         # Return success response with job_id
         return jsonify({'job_id': job_id}), 201
 
@@ -31,11 +33,12 @@ def add_job():
         # Handle any exceptions (e.g., database errors)
         return jsonify({'error': str(e)}), 500
 
-@app.route('/display_jobs',methods=['GET'])
+
+@app.route('/display_jobs', methods=['GET'])
 def display_jobs():
     try:
-        db_helper=Database()
-        job_df= job_repository.get_jobs(db_helper)
+        db_helper = Database()
+        job_df = job_repository.get_jobs(db_helper)
         # Convert DataFrame to list of dictionaries
         jobs_list = job_df.to_dict('records')
 
@@ -43,6 +46,7 @@ def display_jobs():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 ################################################candidate operations#####################################################
 
@@ -54,7 +58,7 @@ def add_candidate():
         email = request.json.get('email')
         major = request.json.get('major')
         skills = request.json.get('skills')
-        phone_number=request.json.get('phone_number','')
+        phone_number = request.json.get('phone_number', '')
 
         if not first_name or not email or not major:
             return jsonify({'error': 'Missing first_name, email, or major'}), 400
@@ -84,9 +88,11 @@ def display_candidates():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
 ################################################application operations###############################################
 
-@app.route('/add_application', methods=['POST']) ##confirmed
+@app.route('/add_application', methods=['POST'])  ##confirmed
 def add_application():
     try:
         # Retrieve data from JSON payload
@@ -94,10 +100,10 @@ def add_application():
         job_id = request.json.get('job_id')
         status = request.json.get('status')
 
-        if not candidate_id or not job_id or not status:#ensure all valuce are present
+        if not candidate_id or not job_id or not status:  #ensure all valuce are present
             return jsonify({'error': 'Missing candidate_id, job_id, or status parameter'}), 400
 
-        db_helper = Database()#instance from Database class
+        db_helper = Database()  #instance from Database class
 
         # Add application and get the new application ID
         data_list = [candidate_id, job_id, status]
@@ -125,6 +131,7 @@ def display_applications():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
 ############################################combination#####################################################
 
 @app.route('/candidates_for_job/<int:job_id>', methods=['GET'])
@@ -136,6 +143,7 @@ def candidates_for_job(job_id):
         return jsonify(candidates_list), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
 
 @app.route('/jobs_for_candidate/<int:candidate_id>', methods=['GET'])
 def jobs_for_candidate(candidate_id):
